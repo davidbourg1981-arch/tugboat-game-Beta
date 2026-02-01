@@ -819,7 +819,8 @@
         font-size: 0.85em;
         /* Move to top-left to avoid joystick (bottom-left) and potential bottom-right buttons */
         bottom: auto;
-        top: 80px; /* Below minimap */
+        top: 80px;
+        /* Below minimap */
         left: 10px;
       }
 
@@ -2918,16 +2919,18 @@
         z-index: 20;
       }
 
-      /* Move buttons (Boats, Career, Licenses) to top-left area to avoid clashing with controls */
+      /* Move buttons (Boats, Career, Licenses) to top-right area to avoid clashing with controls and Job UI */
       .bottom-menu {
-        top: 75px !important;
-        /* Below minimap scale */
-        left: 10px !important;
-        right: auto !important;
+        top: 60px !important;
+        /* Below region indicator */
+        left: auto !important;
+        right: 10px !important;
         bottom: auto !important;
         flex-direction: column;
         gap: 4px;
         z-index: 30;
+        align-items: flex-end;
+        /* Align text to right */
       }
 
       .menu-btn-small {
