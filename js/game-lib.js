@@ -4849,7 +4849,9 @@ function initMobileControls() {
 
     if (!touch) return; // Our finger isn't here anymore?
 
-    e.preventDefault(); // Stop scrolling
+    if (e.preventDefault && typeof e.preventDefault === 'function') {
+      e.preventDefault(); // Stop scrolling
+    }
 
     // Update rect in case of scroll/resize (though it should be fixed)
     const rect = base.getBoundingClientRect();
@@ -4867,18 +4869,18 @@ function initMobileControls() {
 
     // Convert to thrust/turn
     // y is negative for forward (up)
-    
+
     // DEADZONE: Ignore small movements near center (15% of radius)
     const deadzone = 0.15;
     const normalizedDist = clampedDist / maxRadius;
-    
+
     if (normalizedDist < deadzone) {
       mobileThrust = 0;
       mobileTurn = 0;
     } else {
       // Scale output from 0 to 1 starting AFTER deadzone
       const scaledDist = (normalizedDist - deadzone) / (1 - deadzone);
-      
+
       // Calculate components based on angle and scaled distance
       // We re-calculate based on angle to keep direction accurate
       const normY = (Math.sin(angle) * scaledDist); // -1 to 1
@@ -4898,9 +4900,9 @@ function initMobileControls() {
     const touch = e.changedTouches[0];
     joystickTouchId = touch.identifier;
     joystickActive = true;
-    
+
     handleJoystick({ touches: [touch] }); // Artificial event to update immediately
-    
+
     if (!audioCtx && gameStarted) { initAudio(); startEngine(); }
   }, { passive: false });
 
@@ -4908,7 +4910,7 @@ function initMobileControls() {
 
   window.addEventListener('touchend', (e) => {
     if (!joystickActive) return;
-    
+
     // Check if our joystick finger lifted
     for (let i = 0; i < e.changedTouches.length; i++) {
       if (e.changedTouches[i].identifier === joystickTouchId) {
