@@ -2493,6 +2493,32 @@ const UI_NAV = {
   }
 };
 
+
+function _handleEscapeAction() {
+  if (document.getElementById('remapPanel').classList.contains('show')) {
+    closeRemapPanel();
+  } else if (document.getElementById('profilePanel').classList.contains('show')) {
+    hideProfiles();
+  } else if (document.getElementById('difficultyPanel').classList.contains('show')) {
+    closeDifficultySelect();
+  } else if (document.getElementById('howToPlayPanel').classList.contains('show')) {
+    closeHowToPlay();
+  } else if (document.getElementById('jobBoardPanel').classList.contains('show')) {
+    closeJobBoard();
+  } else if (document.getElementById('optionsPanel').classList.contains('show')) {
+    hideOptions();
+  } else if (document.getElementById('licensePanel').classList.contains('show')) {
+    closeLicenses();
+  } else if (document.getElementById('boatShopPanel').classList.contains('show')) {
+    closeBoatShop();
+  } else if (document.getElementById('careerPanel').classList.contains('show')) {
+    closeCareer();
+  } else if (typeof gameStarted !== 'undefined' && gameStarted) {
+    showOptions();
+  }
+}
+window.handleEscapeAction = _handleEscapeAction;
+
 function _hidePanel(id) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -3346,27 +3372,7 @@ function init() {
       toggleAttachment();
     }
     if (e.code === 'Escape') {
-      if (document.getElementById('remapPanel').classList.contains('show')) {
-        closeRemapPanel();
-      } else if (document.getElementById('profilePanel').classList.contains('show')) {
-        hideProfiles();
-      } else if (document.getElementById('difficultyPanel').classList.contains('show')) {
-        closeDifficultySelect();
-      } else if (document.getElementById('howToPlayPanel').classList.contains('show')) {
-        closeHowToPlay();
-      } else if (document.getElementById('jobBoardPanel').classList.contains('show')) {
-        closeJobBoard();
-      } else if (document.getElementById('optionsPanel').classList.contains('show')) {
-        hideOptions();
-      } else if (document.getElementById('licensePanel').classList.contains('show')) {
-        closeLicenses();
-      } else if (document.getElementById('boatShopPanel').classList.contains('show')) {
-        closeBoatShop();
-      } else if (document.getElementById('careerPanel').classList.contains('show')) {
-        closeCareer();
-      } else if (gameStarted) {
-        showOptions();
-      }
+      _handleEscapeAction();
     }
     if ((e.code === keybinds.refuel || e.code === 'KeyF') && gameStarted) refuel();
     if ((e.code === keybinds.repair || e.code === 'KeyR') && gameStarted) repair();

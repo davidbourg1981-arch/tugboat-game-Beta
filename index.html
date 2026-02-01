@@ -13,7 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0a1628">
 
-  <link rel="stylesheet" href="css/style.css?v=1.9">
+  <link rel="stylesheet" href="css/style.css?v=2.1">
 </head>
 
 <body>
@@ -480,6 +480,10 @@
 
     <div class="collision-flash" id="collisionFlash"></div>
     <div class="ui-overlay">
+      <!-- HUD Menu Button (Settings) -->
+      <button id="hudMenuBtn" class="hud-menu-btn" onclick="handleEscapeAction()"><span
+          class="icon icon-settings"></span></button>
+
       <div id="minimapWrapper">
         <canvas class="minimap" id="minimap" width="120" height="100"></canvas>
       </div>
@@ -666,9 +670,9 @@
     </div>
   </div>
 
-  <script src="js/game-lib.js?v=1.9"></script>
-  <script src="js/game-ai.js?v=1.9"></script>
-  <script src="js/game-render.js?v=1.9"></script>
+  <script src="js/game-lib.js?v=2.1"></script>
+  <script src="js/game-ai.js?v=2.1"></script>
+  <script src="js/game-render.js?v=2.1"></script>
   <script>
     // Prevent overscroll/bounce and navigation gestures on mobile
     function preventDefault(e) {
