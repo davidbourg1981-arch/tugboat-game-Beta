@@ -2493,6 +2493,32 @@ const UI_NAV = {
   }
 };
 
+
+function returnToMenu() {
+  if (game.paused || (document.getElementById('optionsPanel') && document.getElementById('optionsPanel').classList.contains('show'))) {
+    game.paused = false;
+  }
+
+  // Hide all panels
+  if (typeof UI_NAV !== 'undefined' && UI_NAV.panelOrder) {
+    UI_NAV.panelOrder.forEach(p => {
+      const el = document.getElementById(p.id);
+      if (el) el.classList.remove('show');
+    });
+  }
+
+  // Hide mobile controls
+  const mob = document.getElementById('mobileControls');
+  if (mob) mob.style.display = 'none';
+
+  // Show Start Screen
+  const start = document.getElementById('startScreen');
+  if (start) start.classList.add('show');
+
+  // Play sound
+  try { playSound('uiBack'); } catch (e) { }
+}
+
 function _hidePanel(id) {
   const el = document.getElementById(id);
   if (!el) return;
