@@ -2972,13 +2972,13 @@
       }
     }
 
-    /* HUD Menu Button (Attempt 3 - Top Right) */
+    /* HUD Menu Button (Attempt 4 - Smaller) */
     .hud-menu-btn {
       position: absolute;
       top: 10px;
       right: 10px;
-      width: 44px;
-      height: 44px;
+      width: 36px;
+      height: 36px;
       background: rgba(0, 30, 60, 0.9);
       border: 2px solid rgba(100, 180, 255, 0.5);
       border-radius: 50%;
@@ -2999,7 +2999,7 @@
     }
 
     .hud-menu-btn .icon {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       margin: 0;
     }
