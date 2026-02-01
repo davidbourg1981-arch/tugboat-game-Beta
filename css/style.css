@@ -560,14 +560,23 @@
       }
     }
 
-    .minimap {
+    #minimapWrapper {
       position: absolute;
       top: 10px;
       left: 10px;
+      width: 120px;
+      height: 70px;
+      /* Crop bottom 30% (land) */
+      overflow: hidden;
       border: 1px solid rgba(100, 180, 255, 0.4);
       border-radius: 4px;
       background: rgba(0, 20, 40, 0.8);
       z-index: 10;
+    }
+
+    .minimap {
+      display: block;
+      /* Canvas content stays full size, wrapper crops it */
     }
 
     /* Success/Fail Messages */
@@ -2910,13 +2919,18 @@
       }
 
       /* Fix minimap scaling */
-      #minimap.minimap {
-        width: 120px !important;
-        height: 100px !important;
-        transform: scale(0.6) !important;
+      #minimapWrapper {
+        /* Scale up the cropped wrapper */
+        transform: scale(0.9) !important;
         transform-origin: top left !important;
         pointer-events: none !important;
         z-index: 20;
+      }
+
+      #minimap.minimap {
+        /* Reset canvas styles */
+        transform: none !important;
+        pointer-events: none !important;
       }
 
       /* Move buttons (Boats, Career, Licenses) to Mid-Right area (below Stats Panel) */
