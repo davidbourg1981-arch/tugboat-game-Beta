@@ -2495,9 +2495,9 @@ const UI_NAV = {
 
 
 function returnToMenu() {
-  if (game.paused || (document.getElementById('optionsPanel') && document.getElementById('optionsPanel').classList.contains('show'))) {
-    game.paused = false;
-  }
+  // Stop game loop logic
+  if (typeof gameStarted !== 'undefined') gameStarted = false;
+  game.paused = false;
 
   // Hide all panels
   if (typeof UI_NAV !== 'undefined' && UI_NAV.panelOrder) {

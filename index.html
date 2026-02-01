@@ -480,6 +480,10 @@
 
     <div class="collision-flash" id="collisionFlash"></div>
     <div class="ui-overlay">
+      <!-- HUD Menu Button (Mobile Friendly) -->
+      <button id="hudMenuBtn" class="hud-menu-btn" onclick="returnToMenu()"><span
+          class="icon icon-settings"></span></button>
+
       <div id="minimapWrapper">
         <canvas class="minimap" id="minimap" width="120" height="100"></canvas>
       </div>
@@ -623,8 +627,6 @@
 
       <div class="mobile-action-buttons">
         <div class="action-btn-row">
-          <button id="mobileMenu" class="mobile-btn" onclick="returnToMenu()"><span
-              class="icon icon-anchor"></span></button>
           <button id="mobileFullscreen" class="mobile-btn" onclick="toggleFullscreen()"><span
               class="icon icon-maximize"></span></button>
           <button id="mobileRefuel" class="mobile-btn"><span class="icon icon-fuel"></span></button>
@@ -632,7 +634,6 @@
         </div>
         <div class="action-btn-row">
           <button id="mobileHorn" class="mobile-btn"><span class="icon icon-horn"></span></button>
-          <button id="mobileAttach" class="mobile-btn primary"><span class="icon icon-anchor"></span></button>
         </div>
       </div>
     </div>
