@@ -2921,7 +2921,7 @@
 
       /* Move buttons (Boats, Career, Licenses) to Mid-Right area (below Stats Panel) */
       .bottom-menu {
-        top: 190px !important;
+        top: 210px !important;
         /* Below Stats Panel */
         left: auto !important;
         right: 10px !important;
