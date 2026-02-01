@@ -2024,10 +2024,10 @@ function selectRegion(index) {
 // Job types
 const JOB_TYPES = {
   STANDARD: { name: 'Standard Tow', icon: '<span class="icon icon-box"></span>', color: '#ffd700', class: 'job-standard', payMult: 1 },
-  RUSH: { name: 'Rush Delivery', icon: '<span class="icon icon-rush"></span>', color: '#e74c3c', class: 'job-rush', payMult: 1.5, hasTimer: true, timePerDist: 0.09 },
-  FRAGILE: { name: 'Fragile Cargo', icon: '<span class="icon icon-fragile"></span>', color: '#9b59b6', class: 'job-fragile', payMult: 1.8, noCollision: true },
-  RESCUE: { name: 'Rescue Mission', icon: '<span class="icon icon-rescue"></span>', color: '#3498db', class: 'job-rescue', payMult: 3, hasTimer: true, fixedTime: 60, sinking: true },
-  SALVAGE: { name: 'Salvage Op', icon: '<span class="icon icon-salvage"></span>', color: '#1abc9c', class: 'job-salvage', payMult: 2.2, floating: true, hasTimer: true, fixedTime: 90 },
+  RUSH: { name: 'Rush Delivery', icon: '<span class="icon icon-rush"></span>', color: '#e74c3c', class: 'job-rush', payMult: 1.5, hasTimer: true, timePerDist: 0.09, requiresLicense: 'express' },
+  FRAGILE: { name: 'Fragile Cargo', icon: '<span class="icon icon-fragile"></span>', color: '#9b59b6', class: 'job-fragile', payMult: 1.8, noCollision: true, requiresLicense: 'fragile' },
+  RESCUE: { name: 'Rescue Mission', icon: '<span class="icon icon-rescue"></span>', color: '#3498db', class: 'job-rescue', payMult: 3, hasTimer: true, fixedTime: 60, sinking: true, requiresLicense: 'rescue' },
+  SALVAGE: { name: 'Salvage Op', icon: '<span class="icon icon-salvage"></span>', color: '#1abc9c', class: 'job-salvage', payMult: 2.2, floating: true, hasTimer: true, fixedTime: 90, requiresLicense: 'salvageExpert' },
   VIP: { name: 'VIP Transport', icon: '<span class="icon icon-vip"></span>', color: '#f39c12', class: 'job-vip', payMult: 3, noCollision: true, hasTimer: true, timePerDist: 0.15, minSpeed: true, requiresLicense: 'vip' },
   TANDEM: { name: 'Tandem Tow', icon: '<span class="icon icon-tandem"></span>', color: '#e67e22', class: 'job-tandem', payMult: 2.5, multiCargo: true, minCargo: 2, maxCargo: 3, requiresLicense: 'tandem' }
 };
@@ -2184,7 +2184,7 @@ const LICENSES = {
     icon: '<span class="icon icon-rush"></span>',
     description: 'More time on rush deliveries',
     cost: 1000,
-    requirement: { type: 'rushJobs', value: 8 },
+    requirement: { type: 'deliveries', value: 12 },
     effect: '+30 seconds on rush delivery timers'
   },
   fragile: {
@@ -2193,7 +2193,7 @@ const LICENSES = {
     icon: '<span class="icon icon-fragile"></span>',
     description: 'Handle delicate cargo with care',
     cost: 1200,
-    requirement: { type: 'fragileJobs', value: 8 },
+    requirement: { type: 'deliveries', value: 18 },
     effect: 'Survive 1 minor collision on fragile cargo'
   },
   rescue: {
@@ -2202,7 +2202,7 @@ const LICENSES = {
     icon: '<span class="icon icon-rescue"></span>',
     description: 'Emergency rescue operations',
     cost: 1500,
-    requirement: { type: 'rescueJobs', value: 6 },
+    requirement: { type: 'deliveries', value: 22 },
     effect: 'Sinking boats sink 40% slower'
   },
   salvageExpert: {
@@ -2211,7 +2211,7 @@ const LICENSES = {
     icon: '<span class="icon icon-salvage"></span>',
     description: 'Master of cargo recovery',
     cost: 1500,
-    requirement: { type: 'salvageJobs', value: 6 },
+    requirement: { type: 'deliveries', value: 28 },
     effect: 'Salvage cargo drifts 50% slower, easier to spot'
   },
 
@@ -3457,24 +3457,33 @@ function getAvailableCargo() {
 }
 
 function pickJobType() {
-  const rand = Math.random();
-  // VIP and Tandem require licenses
-  const canVIP = hasLicense('vip');
-  const canTandem = hasLicense('tandem');
+  // Weighted probability system
+  const weights = [
+    { type: JOB_TYPES.STANDARD, weight: 30 },
+    { type: JOB_TYPES.RUSH, weight: 15 },
+    { type: JOB_TYPES.FRAGILE, weight: 13 },
+    { type: JOB_TYPES.RESCUE, weight: 12 },
+    { type: JOB_TYPES.SALVAGE, weight: 12 },
+    { type: JOB_TYPES.TANDEM, weight: 10 },
+    { type: JOB_TYPES.VIP, weight: 8 }
+  ];
 
-  // Base probabilities
-  if (rand < 0.30) return JOB_TYPES.STANDARD;
-  if (rand < 0.45) return JOB_TYPES.RUSH;
-  if (rand < 0.58) return JOB_TYPES.FRAGILE;
-  if (rand < 0.70) return JOB_TYPES.RESCUE;
-  if (rand < 0.82) return JOB_TYPES.SALVAGE;
-  if (rand < 0.92) {
-    // Tandem only if licensed
-    if (canTandem) return JOB_TYPES.TANDEM;
-    return JOB_TYPES.STANDARD;
+  // Filter by licenses
+  const validJobs = weights.filter(item => {
+    const job = item.type;
+    return !job.requiresLicense || hasLicense(job.requiresLicense);
+  });
+
+  // Calculate total weight
+  const totalWeight = validJobs.reduce((sum, item) => sum + item.weight, 0);
+
+  // Pick random
+  let rand = Math.random() * totalWeight;
+  for (const item of validJobs) {
+    if (rand < item.weight) return item.type;
+    rand -= item.weight;
   }
-  // VIP only if licensed, otherwise give standard
-  if (canVIP) return JOB_TYPES.VIP;
+
   return JOB_TYPES.STANDARD;
 }
 
