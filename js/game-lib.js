@@ -2518,6 +2518,7 @@ function returnToMenu() {
   // Play sound
   try { playSound('uiBack'); } catch (e) { }
 }
+window.returnToMenu = returnToMenu;
 
 function _hidePanel(id) {
   const el = document.getElementById(id);
