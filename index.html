@@ -13,7 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0a1628">
 
-  <link rel="stylesheet" href="css/style.css?v=2.0">
+  <link rel="stylesheet" href="css/style.css?v=1.9">
 </head>
 
 <body>
@@ -480,10 +480,6 @@
 
     <div class="collision-flash" id="collisionFlash"></div>
     <div class="ui-overlay">
-      <!-- HUD Menu Button (Mobile Friendly) -->
-      <button id="hudMenuBtn" class="hud-menu-btn" onclick="returnToMenu()"><span
-          class="icon icon-settings"></span></button>
-
       <div id="minimapWrapper">
         <canvas class="minimap" id="minimap" width="120" height="100"></canvas>
       </div>
@@ -634,6 +630,7 @@
         </div>
         <div class="action-btn-row">
           <button id="mobileHorn" class="mobile-btn"><span class="icon icon-horn"></span></button>
+          <button id="mobileAttach" class="mobile-btn primary"><span class="icon icon-anchor"></span></button>
         </div>
       </div>
     </div>
@@ -669,9 +666,9 @@
     </div>
   </div>
 
-  <script src="js/game-lib.js?v=2.0"></script>
-  <script src="js/game-ai.js?v=2.0"></script>
-  <script src="js/game-render.js?v=2.0"></script>
+  <script src="js/game-lib.js?v=1.9"></script>
+  <script src="js/game-ai.js?v=1.9"></script>
+  <script src="js/game-render.js?v=1.9"></script>
   <script>
     // Prevent overscroll/bounce and navigation gestures on mobile
     function preventDefault(e) {

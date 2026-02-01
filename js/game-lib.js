@@ -2493,33 +2493,6 @@ const UI_NAV = {
   }
 };
 
-
-function returnToMenu() {
-  // Stop game loop logic
-  if (typeof gameStarted !== 'undefined') gameStarted = false;
-  game.paused = false;
-
-  // Hide all panels
-  if (typeof UI_NAV !== 'undefined' && UI_NAV.panelOrder) {
-    UI_NAV.panelOrder.forEach(p => {
-      const el = document.getElementById(p.id);
-      if (el) el.classList.remove('show');
-    });
-  }
-
-  // Hide mobile controls
-  const mob = document.getElementById('mobileControls');
-  if (mob) mob.style.display = 'none';
-
-  // Show Start Screen
-  const start = document.getElementById('startScreen');
-  if (start) start.classList.add('show');
-
-  // Play sound
-  try { playSound('uiBack'); } catch (e) { }
-}
-window.returnToMenu = returnToMenu;
-
 function _hidePanel(id) {
   const el = document.getElementById(id);
   if (!el) return;
