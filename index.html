@@ -1,0 +1,703 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Tugboat Towing Co.</title>
+
+  <!-- Mobile Web App Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a1628">
+
+  <link rel="stylesheet" href="css/style.css?v=1.3">
+</head>
+
+<body>
+  <!-- Dev Tools: Crash Overlay -->
+  <div id="crashOverlay">
+    <div class="panel">
+      <h2><span class="icon icon-warning"></span> Game Error</h2>
+      <div class="muted" style="margin-bottom:8px;">The game hit a runtime error. Copy the details and send it to the
+        dev.</div>
+      <pre id="crashText"></pre>
+      <div class="row">
+        <button id="crashCopyBtn" type="button">Copy error</button>
+        <button id="crashReloadBtn" type="button">Reload</button>
+        <button id="crashCloseBtn" type="button">Close overlay</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dev Tools: Debug HUD (F3) -->
+  <div id="debugHud"></div>
+
+  <div class="game-container" id="gameContainer">
+    <canvas id="gameCanvas" width="900" height="600"></canvas>
+
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+      <!-- Animated background elements -->
+      <div class="menu-water-bg"></div>
+      <div class="menu-clouds"></div>
+      <div class="menu-boats">
+        <span class="floating-boat" style="--delay: 0s; --y: 65%;">🚢</span>
+        <span class="floating-boat" style="--delay: 3s; --y: 75%;">⛴</span>
+        <span class="floating-boat" style="--delay: 6s; --y: 70%;">🚤</span>
+      </div>
+
+      <!-- Main content -->
+      <div class="menu-content">
+        <div class="logo-container">
+          <!-- Custom SVG Tugboat -->
+          <div class="title-ship">
+            <svg viewBox="0 0 200 100" class="tugboat-svg">
+              <!-- Water reflection -->
+              <ellipse cx="100" cy="88" rx="70" ry="8" fill="rgba(100,180,255,0.15)" />
+
+              <!-- Hull -->
+              <defs>
+                <linearGradient id="hullGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#e74c3c" />
+                  <stop offset="50%" style="stop-color:#c0392b" />
+                  <stop offset="100%" style="stop-color:#922b21" />
+                </linearGradient>
+                <linearGradient id="cabinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#ecf0f1" />
+                  <stop offset="100%" style="stop-color:#bdc3c7" />
+                </linearGradient>
+              </defs>
+
+              <!-- Main hull -->
+              <path
+                d="M30 65 Q25 65 25 70 L25 80 Q25 85 35 85 L165 85 Q175 85 175 80 L175 70 Q175 65 170 65 L155 65 Q160 55 150 50 L50 50 Q40 55 45 65 Z"
+                fill="url(#hullGrad)" />
+
+              <!-- Hull stripe -->
+              <path d="M35 75 L165 75 L165 82 Q165 85 160 85 L40 85 Q35 85 35 82 Z" fill="#7f1d1d" />
+
+              <!-- Deck -->
+              <rect x="45" y="50" width="110" height="5" rx="2" fill="#8b5a2b" />
+
+              <!-- Cabin -->
+              <rect x="55" y="25" width="50" height="25" rx="3" fill="url(#cabinGrad)" />
+              <rect x="60" y="30" width="18" height="12" rx="1" fill="#2980b9" />
+              <rect x="82" y="30" width="18" height="12" rx="1" fill="#2980b9" />
+
+              <!-- Smokestack -->
+              <rect x="115" y="20" width="15" height="30" rx="2" fill="#2c3e50" />
+              <rect x="113" y="18" width="19" height="5" rx="1" fill="#1a252f" />
+              <ellipse cx="122" cy="15" rx="6" ry="3" fill="rgba(150,150,150,0.6)" class="smoke" />
+              <ellipse cx="125" cy="10" rx="4" ry="2" fill="rgba(150,150,150,0.4)" class="smoke s2" />
+
+              <!-- Tow hook at back -->
+              <circle cx="35" cy="65" r="4" fill="#f39c12" />
+              <path d="M30 65 Q25 70 30 75" stroke="#f39c12" stroke-width="3" fill="none" />
+
+              <!-- Bow light -->
+              <circle cx="168" cy="60" r="3" fill="#fff" class="bow-light" />
+
+              <!-- Port/starboard lights -->
+              <circle cx="160" cy="52" r="2" fill="#2ecc71" />
+              <circle cx="160" cy="68" r="2" fill="#e74c3c" />
+
+              <!-- Rope coil on deck -->
+              <ellipse cx="145" cy="48" rx="6" ry="3" fill="#8d6e63" />
+              <ellipse cx="145" cy="47" rx="4" ry="2" fill="#a1887f" />
+
+              <!-- Anchor -->
+              <g transform="translate(50, 58)">
+                <circle cx="0" cy="0" r="2" fill="#7f8c8d" />
+                <path d="M0 2 L0 10 M-4 8 L0 12 L4 8" stroke="#7f8c8d" stroke-width="1.5" fill="none" />
+              </g>
+            </svg>
+
+            <!-- Wake effect -->
+            <div class="ship-wake"></div>
+          </div>
+
+          <div class="game-title">
+            <span class="title-main">TUGBOAT</span>
+            <span class="title-sub">TOWING CO.</span>
+          </div>
+          <div class="game-subtitle">Build your maritime empire!</div>
+        </div>
+
+        <div class="menu-buttons">
+          <button class="menu-btn primary" id="newGameBtn" onclick="showDifficultySelect()">
+            <span class="btn-icon"><span class="icon icon-new-game"></span></span>
+            <span class="btn-text">New Game</span>
+          </button>
+          <button class="menu-btn primary" id="continueBtn" onclick="continueGame()" style="display:none;">
+            <span class="btn-icon"><span class="icon icon-continue"></span></span>
+            <span class="btn-text">Continue</span>
+          </button>
+          <button class="menu-btn secondary" onclick="showProfiles()">
+            <span class="btn-icon"><span class="icon icon-profiles"></span></span>
+            <span class="btn-text">Profiles</span>
+          </button>
+          <button class="menu-btn secondary" onclick="showHowToPlay()">
+            <span class="btn-icon"><span class="icon icon-book"></span></span>
+            <span class="btn-text">How to Play</span>
+          </button>
+          <button class="menu-btn secondary" onclick="showOptions()">
+            <span class="btn-icon"><span class="icon icon-settings"></span></span>
+            <span class="btn-text">Options</span>
+          </button>
+        </div>
+
+        <div class="menu-features">
+          <div class="feature">🌊 3 Rivers</div>
+          <div class="feature">🚤 7 Boats</div>
+          <div class="feature">📜 7 Job Types</div>
+          <div class="feature">🪪 14 Licenses</div>
+        </div>
+      </div>
+
+      <div class="menu-footer">
+        <div class="controls-hint">WASD to move &bull; SPACE to attach &bull; H to honk</div>
+        <div class="version-info">v1.2 - River Map Update</div>
+      </div>
+
+      <div class="wave-decoration"></div>
+    </div>
+
+    <!-- Difficulty Selection Panel -->
+    <div class="difficulty-panel panel" id="difficultyPanel">
+      <button class="close-btn" onclick="closeDifficultySelect()">&times;</button>
+      <h2><span class="icon icon-controller"></span> Select Difficulty</h2>
+
+      <div class="difficulty-options">
+        <div class="difficulty-card" onclick="startGameWithDifficulty('easy')">
+          <div class="diff-icon"><span class="icon icon-casual"></span></div>
+          <div class="diff-name">Casual</div>
+          <div class="diff-desc">Relaxed pace, forgiving gameplay</div>
+          <ul class="diff-details">
+            <li>+25% pay on all jobs</li>
+            <li>Fuel lasts 30% longer</li>
+            <li>Slower AI competitors</li>
+            <li>More time on timed jobs</li>
+          </ul>
+        </div>
+
+        <div class="difficulty-card selected" onclick="startGameWithDifficulty('normal')">
+          <div class="diff-icon"><span class="icon icon-anchor"></span></div>
+          <div class="diff-name">Standard</div>
+          <div class="diff-desc">The intended experience</div>
+          <ul class="diff-details">
+            <li>Balanced pay rates</li>
+            <li>Normal fuel consumption</li>
+            <li>Competitive AI</li>
+            <li>Standard timers</li>
+          </ul>
+        </div>
+
+        <div class="difficulty-card" onclick="startGameWithDifficulty('hard')">
+          <div class="diff-icon"><span class="icon icon-hard"></span></div>
+          <div class="diff-name">Captain's Challenge</div>
+          <div class="diff-desc">For experienced captains only</div>
+          <ul class="diff-details">
+            <li>-20% pay on all jobs</li>
+            <li>Fuel burns 25% faster</li>
+            <li>Aggressive AI rivals</li>
+            <li>Tighter time limits</li>
+          </ul>
+        </div>
+
+        <div class="difficulty-card endless" onclick="startGameWithDifficulty('endless')">
+          <div class="diff-icon"><span class="icon icon-endless"></span></div>
+          <div class="diff-name">Endless Mode</div>
+          <div class="diff-desc">No victory, just keep sailing</div>
+          <ul class="diff-details">
+            <li>No win condition</li>
+            <li>Climb the leaderboard forever</li>
+            <li>Standard difficulty</li>
+            <li>See how far you can go!</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Play Panel -->
+    <div class="how-to-play-panel panel" id="howToPlayPanel">
+      <button class="close-btn" onclick="closeHowToPlay()">&times;</button>
+      <h2>📖 How to Play</h2>
+
+      <div class="tutorial-section">
+        <h3><span class="icon icon-target"></span> Goal</h3>
+        <p>Build a tugboat empire! Pick up cargo from ocean docks and rivers, deliver to the harbor. Own all 7 boats,
+          reach Harbor Master tier, earn all 12 licenses, and hit $100,000 to win!</p>
+      </div>
+
+      <div class="tutorial-section">
+        <h3><span class="icon icon-trophy"></span> The Map</h3>
+        <ul class="tutorial-tips">
+          <li>Harbor (left) - Your home base, deliveries here</li>
+          <li>Rivers (center) - 3 routes with currents, bridges</li>
+          <li>Ocean (right) - Open water, higher tier jobs</li>
+        </ul>
+      </div>
+
+      <div class="tutorial-section">
+        <h3><span class="icon icon-settings"></span> Controls</h3>
+        <div class="tutorial-controls">
+          <div><span class="key-hint">W</span><span class="key-hint">A</span><span class="key-hint">S</span><span
+              class="key-hint">D</span> Move</div>
+          <div><span class="key-hint">SPACE</span> Attach/Detach cargo</div>
+          <div><span class="key-hint">F</span> Refuel at dock</div>
+          <div><span class="key-hint">R</span> Repair at dock</div>
+          <div><span class="key-hint">Scroll</span> Zoom in/out</div>
+        </div>
+      </div>
+
+      <div class="tutorial-section">
+        <h3><span class="icon icon-star"></span> Tips</h3>
+        <ul class="tutorial-tips">
+          <li>Watch your fuel! Look for <span class="icon icon-fuel"></span> docks along rivers</li>
+          <li>Blue docks offer repairs <span class="icon icon-repair"></span></li>
+          <li>River currents push toward ocean - use them!</li>
+          <li>Higher tiers = longer routes but more pay <span class="icon icon-money"></span></li>
+          <li>Bad weather = bonus pay! <span class="icon icon-storm"></span></li>
+          <li>South Passage is narrow but pays +50% <span class="icon icon-salvage"></span></li>
+        </ul>
+      </div>
+
+      <button class="menu-btn" onclick="closeHowToPlay()">Got it!</button>
+    </div>
+
+    <!-- Options Panel -->
+    <div class="options-panel panel" id="optionsPanel">
+      <button class="close-btn" onclick="hideOptions()">&times;</button>
+      <h2><span class="icon icon-settings"></span> Options</h2>
+
+      <div class="option-row">
+        <span class="option-label"><span class="icon icon-volume"></span> Sound Effects</span>
+        <div class="option-control">
+          <button class="toggle-btn active" id="soundToggle" onclick="toggleSoundOption()">ON</button>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <span class="option-label"><span class="icon icon-engine"></span> Engine Sound</span>
+        <div class="option-control">
+          <button class="toggle-btn active" id="engineToggle" onclick="toggleEngineOption()">ON</button>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <span class="option-label"><span class="icon icon-volume-high"></span> Volume</span>
+        <div class="slider-container">
+          <input type="range" class="slider" id="volumeSlider" min="0" max="100" value="70" onchange="updateVolume()">
+          <span class="slider-value" id="volumeValue">70%</span>
+        </div>
+      </div>
+
+      <h3 class="options-section-title"><span class="icon icon-eye"></span> Graphics</h3>
+
+      <div class="option-row">
+        <span class="option-label"><span class="icon icon-wave"></span> Wave Animation</span>
+        <div class="option-control">
+          <button class="toggle-btn active" id="wavesToggle" onclick="toggleWavesOption()">ON</button>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <span class="option-label"><span class="icon icon-water"></span> Water Particles</span>
+        <div class="option-control">
+          <button class="toggle-btn active" id="particlesToggle" onclick="toggleParticlesOption()">ON</button>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <span class="option-label"><span class="icon icon-weather"></span> Weather Effects</span>
+        <div class="option-control">
+          <button class="toggle-btn active" id="weatherFxToggle" onclick="toggleWeatherFxOption()">ON</button>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <span class="option-label"><span class="icon icon-trophy"></span> Minimap</span>
+        <div class="option-control">
+          <button class="toggle-btn active" id="minimapToggle" onclick="toggleMinimapOption()">ON</button>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <span class="option-label"><span class="icon icon-star"></span> Quality</span>
+        <div class="option-control">
+          <button class="quality-btn" id="qualityBtn" onclick="cycleQuality()">High</button>
+        </div>
+      </div>
+
+      <h3 class="options-section-title"><span class="icon icon-monitor"></span> Display</h3>
+
+      <div class="option-row">
+        <span class="option-label"><span class="icon icon-monitor"></span> Aspect Ratio</span>
+        <div class="option-control">
+          <button class="quality-btn" id="aspectBtn" onclick="cycleAspect()">3:2</button>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <span class="option-label"><span class="icon icon-maximize"></span> Fullscreen</span>
+        <div class="option-control">
+          <button class="toggle-btn" id="fullscreenToggle" onclick="toggleFullscreen()">OFF</button>
+        </div>
+      </div>
+
+      <h3 class="options-section-title">🎮 Controls</h3>
+
+      <div class="options-buttons" style="margin-bottom: 15px;">
+        <button class="menu-btn" onclick="openRemapPanel()" style="width: 100%;"><span
+            class="icon icon-keyboard"></span> Remap Keys</button>
+      </div>
+
+      <div class="controls-info">
+        <div class="controls-grid" id="controlsDisplay">
+          <div><span class="key-hint" id="keyUp">W</span> <span class="key-hint" id="keyDown">S</span> <span
+              class="key-hint" id="keyLeft">A</span> <span class="key-hint" id="keyRight">D</span></div>
+          <div>Move boat</div>
+          <div><span class="key-hint" id="keyAttach">SPACE</span></div>
+          <div>Attach / Detach</div>
+          <div><span class="key-hint" id="keyRefuel">F</span></div>
+          <div>Refuel</div>
+          <div><span class="key-hint" id="keyRepair">R</span></div>
+          <div>Repair</div>
+          <div><span class="key-hint" id="keyHorn">H</span></div>
+          <div>Horn</div>
+          <div><span class="key-hint" id="keyLeaderboard">L</span></div>
+          <div>Leaderboard</div>
+          <div><span class="key-hint">Scroll</span> / <span class="key-hint">+</span><span class="key-hint">-</span>
+          </div>
+          <div>Zoom In/Out</div>
+          <div><span class="key-hint">0</span></div>
+          <div>Reset Zoom</div>
+        </div>
+      </div>
+
+      <div class="options-buttons">
+        <button class="menu-btn secondary" onclick="quitToMenu()"><span class="icon icon-anchor"></span> Quit to
+          Menu</button>
+        <button class="menu-btn" onclick="hideOptions()">✓ Done</button>
+      </div>
+    </div>
+
+    <!-- Key Remap Panel -->
+    <div class="remap-panel panel" id="remapPanel">
+      <button class="close-btn" onclick="closeRemapPanel()">&times;</button>
+      <h2><span class="icon icon-keyboard"></span> Remap Controls</h2>
+      <p class="remap-instructions">Click a button then press a key to remap</p>
+
+      <div class="remap-grid">
+        <div class="remap-row">
+          <span class="remap-label">Move Up</span>
+          <button class="remap-btn" onclick="startRemap('up')" id="remapUp">W</button>
+        </div>
+        <div class="remap-row">
+          <span class="remap-label">Move Down</span>
+          <button class="remap-btn" onclick="startRemap('down')" id="remapDown">S</button>
+        </div>
+        <div class="remap-row">
+          <span class="remap-label">Move Left</span>
+          <button class="remap-btn" onclick="startRemap('left')" id="remapLeft">A</button>
+        </div>
+        <div class="remap-row">
+          <span class="remap-label">Move Right</span>
+          <button class="remap-btn" onclick="startRemap('right')" id="remapRight">D</button>
+        </div>
+        <div class="remap-row">
+          <span class="remap-label">Attach/Detach</span>
+          <button class="remap-btn" onclick="startRemap('attach')" id="remapAttach">SPACE</button>
+        </div>
+        <div class="remap-row">
+          <span class="remap-label">Refuel</span>
+          <button class="remap-btn" onclick="startRemap('refuel')" id="remapRefuel">F</button>
+        </div>
+        <div class="remap-row">
+          <span class="remap-label">Repair</span>
+          <button class="remap-btn" onclick="startRemap('repair')" id="remapRepair">R</button>
+        </div>
+        <div class="remap-row">
+          <span class="remap-label">Horn</span>
+          <button class="remap-btn" onclick="startRemap('horn')" id="remapHorn">H</button>
+        </div>
+        <div class="remap-row">
+          <span class="remap-label">Leaderboard</span>
+          <button class="remap-btn" onclick="startRemap('leaderboard')" id="remapLeaderboard">L</button>
+        </div>
+      </div>
+
+      <div class="options-buttons">
+        <button class="menu-btn secondary" onclick="resetKeybinds()"><span class="icon icon-repair"></span> Reset
+          Defaults</button>
+        <button class="menu-btn" onclick="closeRemapPanel()">✓ Done</button>
+      </div>
+    </div>
+
+    <!-- Job Board Panel -->
+    <div class="job-board-panel panel" id="jobBoardPanel">
+      <h2>📋 Available Jobs</h2>
+      <p class="job-board-subtitle">Choose a delivery job</p>
+      <div class="job-board-list" id="jobBoardList"></div>
+    </div>
+
+    <!-- Victory Modal -->
+    <div class="game-end-modal" id="victoryModal">
+      <div class="game-end-content victory">
+        <div class="game-end-icon"><span class="icon icon-trophy"
+            style="font-size: 64px; width: 64px; height: 64px;"></span></div>
+        <h1>TYCOON VICTORY!</h1>
+        <p class="game-end-subtitle">You've built a tugboat empire!</p>
+        <div class="game-end-stats" id="victoryStats"></div>
+        <div class="game-end-buttons">
+          <button class="game-end-btn continue-btn" onclick="continueAfterVictory()"><span
+              class="icon icon-continue"></span> Keep Playing</button>
+          <button class="game-end-btn menu-btn" onclick="returnToMenuFromEnd()"><span class="icon icon-anchor"></span>
+            Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div class="game-end-modal" id="gameOverModal">
+      <div class="game-end-content gameover">
+        <div class="game-end-icon"><span class="icon icon-money"
+            style="font-size: 64px; width: 64px; height: 64px;"></span></div>
+        <h1>BANKRUPTCY!</h1>
+        <p class="game-end-subtitle">Your company has gone under...</p>
+        <div class="game-end-stats" id="gameOverStats"></div>
+        <div class="game-end-buttons">
+          <button class="game-end-btn primary-btn" onclick="tryAgain()"><span class="icon icon-repair"></span> Try
+            Again</button>
+          <button class="game-end-btn menu-btn" onclick="returnToMenuFromEnd()"><span class="icon icon-anchor"></span>
+            Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="collision-flash" id="collisionFlash"></div>
+    <div class="ui-overlay">
+      <canvas class="minimap" id="minimap" width="120" height="100"></canvas>
+
+      <!-- Region Indicator (top center) -->
+      <div class="region-indicator" id="regionIndicator">
+        <span id="regionText"><span class="icon icon-anchor"></span> Starter Bay</span>
+      </div>
+
+      <!-- Zoom Indicator (below region) -->
+      <div class="zoom-indicator" id="zoomIndicator" style="display: none;">
+        <span id="zoomText"><span class="icon icon-search"></span> 100%</span>
+      </div>
+
+      <!-- Wind Indicator (bottom left, above quest panel) -->
+      <div class="wind-indicator" id="windIndicator" style="display: none;">
+        <div class="wind-compass">
+          <div class="wind-arrow" id="windArrow"></div>
+        </div>
+        <div class="wind-icon" id="windIcon"><span class="icon icon-wind"></span></div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="leaderboard" id="leaderboard">
+        <div class="leaderboard-title"><span class="icon icon-trophy"></span> Leaderboard</div>
+        <div class="ai-tier" id="aiTier"><span class="icon icon-casual"></span> AI: Rookie</div>
+        <div id="leaderboardEntries"></div>
+      </div>
+
+
+      <!-- Event Notification -->
+      <div class="event-notification" id="eventNotification">
+        <h3 id="eventTitle">Event!</h3>
+        <p id="eventText">Something happened</p>
+      </div>
+
+      <!-- Auto-save Indicator -->
+      <div class="autosave-indicator" id="autosaveIndicator"><span class="icon icon-save"></span> Saved</div>
+
+      <!-- Taunt Bubble -->
+      <div class="taunt-bubble" id="tauntBubble"></div>
+
+      <div class="panel quest-panel" id="questPanel">
+        <div class="quest-title" id="questTitle"><span class="icon icon-boat"></span> Current Job</div>
+        <div class="quest-desc" id="questDesc">Loading...</div>
+        <div class="timer-bar" id="timerBar" style="display:none;">
+          <div class="timer-label" id="timerLabel">&#x23F3; Time: <span id="timerValue">0</span>s</div>
+          <div class="timer-bar-bg">
+            <div class="timer-bar-fill" id="timerFill" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Left Menu Buttons -->
+      <div class="bottom-menu">
+        <button class="menu-btn-small boats-btn" onclick="openBoatShop()"><span class="icon icon-boat"></span>
+          Boats</button>
+        <button class="menu-btn-small career-btn" onclick="openCareer()"><span class="icon icon-trophy"></span>
+          Career</button>
+        <button class="menu-btn-small upgrades-btn" onclick="openLicenses()"><span class="icon icon-star"></span>
+          Licenses</button>
+      </div>
+      <div class="panel stats-panel">
+        <div class="money-display">$<span id="money">0</span></div>
+        <div class="stat-row">
+          <span class="stat-label"><span class="icon icon-fuel"></span> Fuel</span>
+          <span class="stat-value" id="fuelPercent">100</span><span class="stat-label">%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label"><span class="icon icon-repair"></span> Hull</span>
+          <span class="stat-value" id="healthPercent">100</span><span class="stat-label">%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label"><span class="icon icon-sun"></span> Weather</span>
+          <span class="stat-value" id="weatherDisplay">Clear</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label"><span class="icon icon-trophy"></span> Rank</span>
+          <span class="stat-value" id="currentRegion">Rookie</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label"><span class="icon icon-boat"></span> Boat</span>
+          <span class="stat-value" id="boatName">Starter</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label"><span class="icon icon-box"></span> Jobs</span>
+          <span class="stat-value" id="jobsDone">0</span>
+        </div>
+      </div>
+      <button class="refuel-btn" id="refuelBtn" onclick="refuel()"><span class="icon icon-fuel"></span> $<span
+          id="refuelCost">0</span></button>
+      <button class="repair-btn" id="repairBtn" onclick="repair()"><span class="icon icon-repair"></span> $<span
+          id="repairCost">0</span></button>
+    </div>
+    <div class="message success" id="message">
+      <h2 id="messageTitle">Delivery Complete!</h2>
+      <p id="messageText"></p>
+    </div>
+    <!-- License Shop Panel -->
+    <div class="upgrade-panel panel" id="licensePanel">
+      <button class="close-btn" onclick="closeLicenses()">&times;</button>
+      <h2><span class="icon icon-star"></span> License Shop</h2>
+      <p style="text-align:center; font-size:10px; color:#7aa8cc; margin-bottom:12px;">Unlock new abilities and cargo
+        types</p>
+      <div id="licenseList"></div>
+    </div>
+
+    <!-- Boat Shop Panel -->
+    <div class="upgrade-panel panel" id="boatShopPanel">
+      <button class="close-btn" onclick="closeBoatShop()">&times;</button>
+      <h2><span class="icon icon-boat"></span> Boat Shop</h2>
+      <div id="boatList"></div>
+    </div>
+
+    <!-- Career Panel -->
+    <div class="career-panel panel" id="careerPanel">
+      <button class="close-btn" onclick="closeCareer()">&times;</button>
+      <h2><span class="icon icon-trophy"></span> Career Progress</h2>
+      <div class="career-stats">
+        <div class="career-stat">
+          <div class="career-stat-value" id="careerDeliveries">0</div>
+          <div class="career-stat-label">Total Deliveries</div>
+        </div>
+        <div class="career-stat">
+          <div class="career-stat-value" id="careerEarnings">$0</div>
+          <div class="career-stat-label">Total Earnings</div>
+        </div>
+        <div class="career-stat">
+          <div class="career-stat-value" id="careerRegions">1/5</div>
+          <div class="career-stat-label">Tier Rank</div>
+        </div>
+      </div>
+      <div id="regionList"></div>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div id="mobileControls" class="mobile-only">
+      <div id="joystickBase">
+        <div id="joystickKnob"></div>
+      </div>
+
+      <div class="mobile-action-buttons">
+        <div class="action-btn-row">
+          <button id="mobileFullscreen" class="mobile-btn" onclick="toggleFullscreen()"><span
+              class="icon icon-maximize"></span></button>
+          <button id="mobileRefuel" class="mobile-btn"><span class="icon icon-fuel"></span></button>
+          <button id="mobileRepair" class="mobile-btn"><span class="icon icon-repair"></span></button>
+        </div>
+        <div class="action-btn-row">
+          <button id="mobileHorn" class="mobile-btn"><span class="icon icon-horn"></span></button>
+          <button id="mobileAttach" class="mobile-btn primary"><span class="icon icon-anchor"></span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile (Save Slots) Panel - Outside game container for proper z-index -->
+  <div class="profile-panel panel" id="profilePanel" aria-hidden="true">
+    <button class="close-btn" onclick="hideProfiles()">&times;</button>
+    <h2>&#x1F5C2; Profiles</h2>
+    <div class="profile-hint">Controller: D-pad/Stick to move &bull; A select &bull; B back</div>
+    <div class="slot-grid" id="slotGrid"></div>
+    <div class="profile-footer">
+      <div class="profile-hint" id="activeSlotLabel"></div>
+      <div class="profile-actions">
+        <button class="menu-btn secondary" onclick="renameActiveProfile()">
+          <span class="btn-icon">&#x270F;</span>
+          <span class="btn-text">Rename</span>
+        </button>
+        <button class="menu-btn secondary" onclick="exportActiveProfile()">
+          <span class="btn-icon">&#x1F4BE;</span>
+          <span class="btn-text">Export</span>
+        </button>
+        <button class="menu-btn secondary" onclick="importIntoActiveProfile()">
+          <span class="btn-icon">&#x1F4E5;</span>
+          <span class="btn-text">Import</span>
+        </button>
+        <input type="file" id="profileImportInput" accept="application/json,.json" style="display:none" />
+      </div>
+      <button class="menu-btn secondary" onclick="hideProfiles()">
+        <span class="btn-icon">&#x2705;</span>
+        <span class="btn-text">Close</span>
+      </button>
+    </div>
+  </div>
+
+  <script src="js/game-lib.js"></script>
+  <script src="js/game-ai.js"></script>
+  <script src="js/game-render.js"></script>
+  <script>
+    // Prevent overscroll/bounce and navigation gestures on mobile
+    function preventDefault(e) {
+      // 1. If we're interacting with a menu panel or UI button, allow standard behavior
+      if (e.target.closest('.panel, button, .mobile-btn, #joystickBase, .difficulty-card, .menu-btn-small')) {
+        return;
+      }
+
+      // 2. Block multi-touch zoom globally
+      if (e.touches && e.touches.length > 1) {
+        e.preventDefault();
+      }
+
+      // 3. Block screen dragging ONLY on the game background (canvas)
+      if (e.type === 'touchmove') {
+        e.preventDefault();
+      }
+    }
+
+    document.addEventListener('touchstart', preventDefault, { passive: false });
+    document.addEventListener('touchmove', preventDefault, { passive: false });
+
+    // Disable context menu (long press) to avoid system interference
+    window.oncontextmenu = function (event) {
+      if (event.target.id === 'gameCanvas' || event.target.closest('#mobileControls')) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+    };
+  </script>
+</body>
+
+</html>
