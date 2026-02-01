@@ -577,6 +577,10 @@
     .minimap {
       display: block;
       /* Canvas content stays full size, wrapper crops it */
+      max-width: none !important;
+      max-height: none !important;
+      width: 120px !important;
+      height: 100px !important;
     }
 
     /* Success/Fail Messages */
