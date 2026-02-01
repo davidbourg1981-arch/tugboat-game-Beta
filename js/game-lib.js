@@ -752,11 +752,21 @@ function selectBoat(index) {
 }
 
 function initAudio() {
-  if (!audioCtx) {
-    audioCtx = new AudioContext();
-  }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
+  try {
+    if (!audioCtx) {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtxClass) {
+        audioCtx = new AudioCtxClass();
+      }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(err => {
+        // Ignore permission errors - audio will start on next user interaction
+        console.log('Audio resume deferred:', err);
+      });
+    }
+  } catch (e) {
+    console.warn('Audio initialization failed:', e);
   }
 }
 
