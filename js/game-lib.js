@@ -3772,6 +3772,35 @@ function selectJob(index) {
   updateJobUI();
 }
 
+
+function reopenJobBoard() {
+  // Hard modal: Job Board (pause + block other panels)
+  if (window.Game && Game.ui && Game.ui.lockModal) {
+    if (!Game.ui.lockModal('jobBoard')) return;
+  } else {
+    game.paused = true;
+  }
+
+  // If we have jobs, just show them. If not, generate new ones.
+  if (!availableJobs || availableJobs.length === 0) {
+    spawnJobBoard();
+  } else {
+    updateJobBoardUI();
+  }
+
+  document.getElementById('jobBoardPanel').classList.add('show');
+
+  // Controller: focus first job option
+  try {
+    gpFocusIndex = 0;
+    setTimeout(() => {
+      const els = _gpGetFocusableEls();
+      if (els && els.length) _gpSetFocused(els[0]);
+    }, 0);
+  } catch (_) { }
+}
+window.reopenJobBoard = reopenJobBoard;
+
 function spawnNewJob() {
   // Hard modal: Job Board (pause + block other panels)
   if (window.Game && Game.ui && Game.ui.lockModal) {

@@ -13,7 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0a1628">
 
-  <link rel="stylesheet" href="css/style.css?v=2.3">
+  <link rel="stylesheet" href="css/style.css?v=2.4">
 </head>
 
 <body>
@@ -381,7 +381,6 @@
       <div class="options-buttons">
         <button class="menu-btn secondary" onclick="quitToMenu()"><span class="icon icon-anchor"></span> Quit to
           Menu</button>
-        <button class="menu-btn" onclick="hideOptions()">✓ Done</button>
       </div>
     </div>
 
@@ -539,6 +538,8 @@
 
       <!-- Bottom Left Menu Buttons -->
       <div class="bottom-menu">
+        <button class="menu-btn-small options-btn" onclick="reopenJobBoard()"><span class="icon icon-search"></span>
+          Jobs</button>
         <button class="menu-btn-small boats-btn" onclick="openBoatShop()"><span class="icon icon-boat"></span>
           Boats</button>
         <button class="menu-btn-small career-btn" onclick="openCareer()"><span class="icon icon-trophy"></span>
@@ -670,9 +671,9 @@
     </div>
   </div>
 
-  <script src="js/game-lib.js?v=2.3"></script>
-  <script src="js/game-ai.js?v=2.3"></script>
-  <script src="js/game-render.js?v=2.3"></script>
+  <script src="js/game-lib.js?v=2.4"></script>
+  <script src="js/game-ai.js?v=2.4"></script>
+  <script src="js/game-render.js?v=2.4"></script>
   <script>
     // Prevent overscroll/bounce and navigation gestures on mobile
     function preventDefault(e) {
