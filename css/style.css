@@ -2919,10 +2919,10 @@
         z-index: 20;
       }
 
-      /* Move buttons (Boats, Career, Licenses) to top-right area to avoid clashing with controls and Job UI */
+      /* Move buttons (Boats, Career, Licenses) to Mid-Right area (below Stats Panel) */
       .bottom-menu {
-        top: 60px !important;
-        /* Below region indicator */
+        top: 190px !important;
+        /* Below Stats Panel */
         left: auto !important;
         right: 10px !important;
         bottom: auto !important;
