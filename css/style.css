@@ -817,6 +817,10 @@
       .quest-panel {
         max-width: 150px;
         font-size: 0.85em;
+        /* Move to top-left to avoid joystick (bottom-left) and potential bottom-right buttons */
+        bottom: auto;
+        top: 80px; /* Below minimap */
+        left: 10px;
       }
 
       .minimap {

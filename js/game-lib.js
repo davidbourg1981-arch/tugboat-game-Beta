@@ -4819,6 +4819,7 @@ function updateJobRules(delta) {
 let mobileThrust = 0;
 let mobileTurn = 0;
 let joystickActive = false;
+let joystickTouchId = null; // Track specific finger
 
 function initMobileControls() {
   const base = document.getElementById('joystickBase');
@@ -4832,9 +4833,25 @@ function initMobileControls() {
 
   function handleJoystick(e) {
     if (!joystickActive) return;
-    e.preventDefault();
 
-    const touch = e.touches ? e.touches[0] : e;
+    // Find the touch that started the joystick interaction
+    let touch = null;
+    if (e.touches) {
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === joystickTouchId) {
+          touch = e.touches[i];
+          break;
+        }
+      }
+    } else {
+      touch = e; // Mouse fallback
+    }
+
+    if (!touch) return; // Our finger isn't here anymore?
+
+    e.preventDefault(); // Stop scrolling
+
+    // Update rect in case of scroll/resize (though it should be fixed)
     const rect = base.getBoundingClientRect();
     const x = touch.clientX - rect.left - centerX;
     const y = touch.clientY - rect.top - centerY;
@@ -4850,26 +4867,59 @@ function initMobileControls() {
 
     // Convert to thrust/turn
     // y is negative for forward (up)
-    mobileThrust = - (y / maxRadius);
-    mobileThrust = Math.max(-0.5, Math.min(1, mobileThrust));
+    
+    // DEADZONE: Ignore small movements near center (15% of radius)
+    const deadzone = 0.15;
+    const normalizedDist = clampedDist / maxRadius;
+    
+    if (normalizedDist < deadzone) {
+      mobileThrust = 0;
+      mobileTurn = 0;
+    } else {
+      // Scale output from 0 to 1 starting AFTER deadzone
+      const scaledDist = (normalizedDist - deadzone) / (1 - deadzone);
+      
+      // Calculate components based on angle and scaled distance
+      // We re-calculate based on angle to keep direction accurate
+      const normY = (Math.sin(angle) * scaledDist); // -1 to 1
+      const normX = (Math.cos(angle) * scaledDist); // -1 to 1
 
-    mobileTurn = x / maxRadius;
-    mobileTurn = Math.max(-1, Math.min(1, mobileTurn));
+      mobileThrust = -normY;
+      mobileThrust = Math.max(-0.5, Math.min(1, mobileThrust));
+
+      mobileTurn = normX;
+      mobileTurn = Math.max(-1, Math.min(1, mobileTurn));
+    }
   }
 
   base.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    // Use the first changed touch as the joystick controller
+    const touch = e.changedTouches[0];
+    joystickTouchId = touch.identifier;
     joystickActive = true;
-    handleJoystick(e);
+    
+    handleJoystick({ touches: [touch] }); // Artificial event to update immediately
+    
     if (!audioCtx && gameStarted) { initAudio(); startEngine(); }
-  });
+  }, { passive: false });
 
   window.addEventListener('touchmove', handleJoystick, { passive: false });
 
-  window.addEventListener('touchend', () => {
-    joystickActive = false;
-    mobileThrust = 0;
-    mobileTurn = 0;
-    knob.style.transform = 'translate(-50%, -50%)';
+  window.addEventListener('touchend', (e) => {
+    if (!joystickActive) return;
+    
+    // Check if our joystick finger lifted
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === joystickTouchId) {
+        joystickActive = false;
+        joystickTouchId = null;
+        mobileThrust = 0;
+        mobileTurn = 0;
+        knob.style.transform = 'translate(-50%, -50%)';
+        break;
+      }
+    }
   });
 
   // Action Buttons
@@ -4889,6 +4939,12 @@ function initMobileControls() {
     e.preventDefault();
     if (gameStarted) repair();
   });
+  // Fullscreen button
+  document.getElementById('mobileFullscreen')?.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    toggleFullscreen();
+  });
+
 
   // Auto-show mobile controls if touch device detected
   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
